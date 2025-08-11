@@ -1,0 +1,23 @@
+#This is Shrey's Commit
+---
+- name: Ensure Nginx and ELB are always up and running
+  hosts: localhost
+  tasks:
+    - name: Ensure Nginx service is started
+      ansible.builtin.service:
+        name: nginx
+        state: started
+      become: yes
+
+    - name: Verify ELB health
+      community.aws.elb_instance_health_facts:
+        region: "{{ aws_region }}"
+        load_balancer_name: "{{ elb_name }}"
+      register: elb_health
+
+    - name: Ensure all instances behind ELB are in "InService" state
+      assert:
+        that: 
+          - item.state == 'InService'
+        fail_msg: "ELB {{ elb_name }} has instances out of service"
+      loop: "{{ elb_health.instance_states }}"
