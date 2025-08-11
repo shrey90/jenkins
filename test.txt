@@ -1,2 +1,4 @@
 date
 sleep 5
+echo "my jenkins poll_scm"
+
